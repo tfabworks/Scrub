@@ -30,6 +30,7 @@ public class ScratchWebViewController: WebViewController {
     
     private let scratchLink = ScratchLink()
     private let webMidi = WebMIDI()
+    private let webSpeechSynth = WebSpeechSynth()
     
     private var downloadingUrl: URL? = nil
     
@@ -44,6 +45,7 @@ public class ScratchWebViewController: WebViewController {
         scratchLink.delegate = self
         
         webMidi.setup(webView: webView)
+        webSpeechSynth.setup(webView: webView)
     }
     
     required init?(coder: NSCoder) {
@@ -176,6 +178,7 @@ extension ScratchWebViewController: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         scratchLink.closeAllSessions()
         webMidi.reset()
+        webSpeechSynth.reset()
     }
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
