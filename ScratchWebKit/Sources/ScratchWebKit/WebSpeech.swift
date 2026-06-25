@@ -137,8 +137,19 @@ extension WebSpeech {
         self.request = request
 
         let inputNode = audioEngine.inputNode
-        let format = inputNode.outputFormat(forBus: 0)
         inputNode.removeTap(onBus: 0)
+        let format = inputNode.outputFormat(forBus: 0)
+        // The audio route can be momentarily unavailable (0 channels / 0 Hz)
+        // when a new recognition starts right after a previous one was torn
+        // down. Installing a tap with such a format makes AVAudioEngine throw
+        // an Objective-C exception that can't be caught in Swift, aborting the
+        // whole app. Bail out gracefully instead of crashing.
+        guard format.channelCount > 0, format.sampleRate > 0 else {
+            stopAudio()
+            sendError(id, "audio-capture")
+            sendEnd(id)
+            return
+        }
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
             self?.request?.append(buffer)
         }
